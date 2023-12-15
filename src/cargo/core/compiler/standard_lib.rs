@@ -6,7 +6,7 @@ use crate::core::compiler::{CompileKind, CompileMode, RustcTargetData, Unit};
 use crate::core::profiles::{Profiles, UnitFor};
 use crate::core::resolver::features::{CliFeatures, FeaturesFor, ResolvedFeatures};
 use crate::core::resolver::HasDevUnits;
-use crate::core::{Dependency, PackageId, PackageSet, Resolve, SourceId, Workspace};
+use crate::core::{dependency::Span, Dependency, PackageId, PackageSet, Resolve, SourceId, Workspace};
 use crate::ops::{self, Packages};
 use crate::util::errors::CargoResult;
 use crate::Config;
@@ -65,6 +65,7 @@ pub fn resolve_std<'cfg>(
     target_data: &mut RustcTargetData<'cfg>,
     build_config: &BuildConfig,
     crates: &[String],
+    span: Option<Span>,
 ) -> CargoResult<(PackageSet<'cfg>, Resolve, ResolvedFeatures)> {
     if build_config.build_plan {
         ws.config()
@@ -82,7 +83,7 @@ pub fn resolve_std<'cfg>(
         .iter()
         .map(|&name| {
             let source_path = SourceId::for_path(&src_path.join("library").join(name))?;
-            let dep = Dependency::parse(name, None, source_path)?;
+            let dep = Dependency::parse(name, None, source_path, span.clone())?;
             Ok(dep)
         })
         .collect::<CargoResult<Vec<_>>>()?;

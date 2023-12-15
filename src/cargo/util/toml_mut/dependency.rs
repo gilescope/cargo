@@ -203,6 +203,7 @@ impl Dependency {
                     self.name.as_str(),
                     self.version(),
                     source_id,
+                    None,
                 )?,
             )),
         }

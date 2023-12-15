@@ -9,11 +9,12 @@ use cargo_platform::Platform;
 use cargo_util::paths;
 use itertools::Itertools;
 use lazycell::LazyCell;
+use toml::Spanned;
 use tracing::{debug, trace};
 use url::Url;
 
 use crate::core::compiler::{CompileKind, CompileTarget};
-use crate::core::dependency::{Artifact, ArtifactTarget, DepKind};
+use crate::core::dependency::{Artifact, ArtifactTarget, DepKind, Span};
 use crate::core::manifest::{ManifestMetadata, TargetSourcePath, Warnings};
 use crate::core::resolver::ResolveBehavior;
 use crate::core::{find_workspace_root, resolve_relative_path, CliUnstable};
@@ -350,7 +351,7 @@ pub fn prepare_for_publish(
             }
             manifest::InheritableDependency::Value(manifest::TomlDependency::Simple(s)) => {
                 Ok(manifest::TomlDetailedDependency {
-                    version: Some(s.clone()),
+                    version: Some(s.clone().into_inner()),//TODO converve span.
                     ..Default::default()
                 })
             }
@@ -1634,7 +1635,7 @@ fn inner_dependency_inherit_with<'a>(
                     || dependency.public.is_some()
                 {
                     manifest::TomlDependency::Detailed(manifest::TomlDetailedDependency {
-                        version: Some(s),
+                        version: Some(s.clone().into_inner()),//TODO converve span
                         optional: dependency.optional,
                         features: dependency.features.clone(),
                         public: dependency.public,
@@ -1695,6 +1696,7 @@ pub(crate) fn to_dependency<P: ResolveToPath + Clone>(
     root: &Path,
     features: &Features,
     kind: Option<DepKind>,
+    span: Option<Span>,
 ) -> CargoResult<Dependency> {
     dep_to_dependency(
         dep,
@@ -1722,7 +1724,7 @@ fn dep_to_dependency<P: ResolveToPath + Clone>(
     match *orig {
         manifest::TomlDependency::Simple(ref version) => detailed_dep_to_dependency(
             &manifest::TomlDetailedDependency::<P> {
-                version: Some(version.clone()),
+                version: Some(version.clone().into_inner()),//TODO converve span.
                 ..Default::default()
             },
             name,
@@ -1902,7 +1904,7 @@ fn detailed_dep_to_dependency<P: ResolveToPath + Clone>(
     };
 
     let version = orig.version.as_deref();
-    let mut dep = Dependency::parse(pkg_name, version, new_source_id)?;
+    let mut dep = Dependency::parse(pkg_name, version, new_source_id, None)?;
     if orig.default_features.is_some() && orig.default_features2.is_some() {
         warn_on_deprecated("default-features", name_in_toml, "dependency", cx.warnings);
     }

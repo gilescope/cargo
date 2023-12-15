@@ -282,7 +282,7 @@ pub fn create_bcx<'a, 'cfg>(
 
     let std_resolve_features = if let Some(crates) = &config.cli_unstable().build_std {
         let (std_package_set, std_resolve, std_features) =
-            standard_lib::resolve_std(ws, &mut target_data, &build_config, crates)?;
+            standard_lib::resolve_std(ws, &mut target_data, &build_config, crates, None)?;
         pkg_set.add_set(std_package_set);
         Some((std_resolve, std_features))
     } else {

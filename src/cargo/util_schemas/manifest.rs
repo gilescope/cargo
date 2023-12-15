@@ -13,7 +13,9 @@ use std::str;
 use serde::de::{self, IntoDeserializer as _, Unexpected};
 use serde::ser;
 use serde::{Deserialize, Serialize};
+use serde_ignored::deserialize;
 use serde_untagged::UntaggedEnumVisitor;
+use toml::Spanned;
 
 use crate::util_schemas::core::PackageIdSpec;
 use crate::util_semver::PartialVersion;
@@ -513,7 +515,7 @@ impl TomlInheritedDependency {
 pub enum TomlDependency<P: Clone = String> {
     /// In the simple format, only a version is specified, eg.
     /// `package = "<version>"`
-    Simple(String),
+    Simple(Spanned<String>),
     /// The simple format is equivalent to a detailed dependency
     /// specifying only a version, eg.
     /// `package = { version = "<version>" }`
@@ -555,14 +557,18 @@ impl<'de, P: Deserialize<'de> + Clone> de::Deserialize<'de> for TomlDependency<P
     where
         D: de::Deserializer<'de>,
     {
-        UntaggedEnumVisitor::new()
-            .expecting(
-                "a version string like \"0.9.8\" or a \
-                     detailed dependency like { version = \"0.9.8\" }",
-            )
-            .string(|value| Ok(TomlDependency::Simple(value.to_owned())))
-            .map(|value| value.deserialize().map(TomlDependency::Detailed))
-            .deserialize(deserializer)
+        Spanned::<String>::deserialize(deserializer)
+            .map(|value|Ok(TomlDependency::Simple(value)))
+            .expect("TODO: it's a toml map, toml dep detailed decode")
+        // .map(|value| value.deserialize().map(TomlDependency::Detailed))
+        // UntaggedEnumVisitor::new()
+        //     .expecting(
+        //         "a version string like \"0.9.8\" or a \
+        //              detailed dependency like { version = \"0.9.8\" }",
+        //     )
+        //     .string(|value| Ok(TomlDependency::Simple(value.to_owned())))
+        //     .map(|value| value.deserialize().map(TomlDependency::Detailed))
+        //     .deserialize(deserializer)
     }
 }
 

@@ -603,7 +603,7 @@ where
                     let extra = if dep.source_id().is_registry() {
                         // Match any version, not just the selected
                         let msrv_dep =
-                            Dependency::parse(dep.package_name(), None, dep.source_id())?;
+                            Dependency::parse(dep.package_name(), None, dep.source_id(), dep.span())?;
                         let msrv_deps = loop {
                             match source.query_vec(&msrv_dep, QueryKind::Exact)? {
                                 Poll::Ready(deps) => break deps,

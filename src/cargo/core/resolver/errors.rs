@@ -95,7 +95,9 @@ pub(super) fn activation_error(
         let mut msg = format!("failed to select a version for `{}`.", dep.package_name());
         msg.push_str("\n    ... required by ");
         msg.push_str(&describe_path_in_context(cx, &parent.package_id()));
-
+        if dep.span().is_some() {
+            msg.push_str(&format!("GILES LINE LINE LINE {:?}", dep.span()));
+        }
         msg.push_str("\nversions that meet the requirements `");
         msg.push_str(&dep.version_req().to_string());
         msg.push_str("` ");

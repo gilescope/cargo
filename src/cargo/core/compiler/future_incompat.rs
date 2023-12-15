@@ -327,7 +327,7 @@ fn get_updates(ws: &Workspace<'_>, package_ids: &BTreeSet<PackageId>) -> Option<
             let Some(source) = sources.get_mut(&pkg_id.source_id()) else {
                 return false;
             };
-            let Ok(dep) = Dependency::parse(pkg_id.name(), None, pkg_id.source_id()) else {
+            let Ok(dep) = Dependency::parse(pkg_id.name(), None, pkg_id.source_id(), None) else {
                 return false;
             };
             match source.query_vec(&dep, QueryKind::Exact) {

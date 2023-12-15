@@ -85,7 +85,7 @@
 //! [`RemoteRegistry`]: super::remote::RemoteRegistry
 //! [`Dependency`]: crate::core::Dependency
 
-use crate::core::dependency::{Artifact, DepKind};
+use crate::core::dependency::{Artifact, DepKind, Span};
 use crate::core::Dependency;
 use crate::core::{PackageId, SourceId, Summary};
 use crate::sources::registry::{LoadResponse, RegistryData};
@@ -948,7 +948,7 @@ impl IndexSummary {
         let pkgid = PackageId::new(name.into(), vers.clone(), source_id);
         let deps = deps
             .into_iter()
-            .map(|dep| dep.into_dep(source_id))
+            .map(|dep| dep.into_dep(source_id, None))
             .collect::<CargoResult<Vec<_>>>()?;
         if let Some(features2) = features2 {
             for (name, values) in features2 {
@@ -976,7 +976,7 @@ impl IndexSummary {
 
 impl<'a> RegistryDependency<'a> {
     /// Converts an encoded dependency in the registry to a cargo dependency
-    pub fn into_dep(self, default: SourceId) -> CargoResult<Dependency> {
+    pub fn into_dep(self, default: SourceId, span: Option<Span>) -> CargoResult<Dependency> {
         let RegistryDependency {
             name,
             req,
@@ -999,7 +999,7 @@ impl<'a> RegistryDependency<'a> {
             default
         };
 
-        let mut dep = Dependency::parse(package.unwrap_or(name), Some(&req), id)?;
+        let mut dep = Dependency::parse(package.unwrap_or(name), Some(&req), id, span)?;
         if package.is_some() {
             dep.set_explicit_name_in_toml(name);
         }

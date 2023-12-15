@@ -216,7 +216,7 @@ fn wait_for_publish(
     // overall progress bar managed here.
     source.set_quiet(true);
     let source_description = source.source_id().to_string();
-    let query = Dependency::parse(pkg.name(), Some(&version_req), registry_src)?;
+    let query = Dependency::parse(pkg.name(), Some(&version_req), registry_src, None)?;
 
     let now = std::time::Instant::now();
     let sleep_time = Duration::from_secs(1);

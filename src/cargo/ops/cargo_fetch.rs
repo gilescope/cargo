@@ -71,7 +71,7 @@ pub fn fetch<'a>(
     // We don't know ahead of time what jobs we'll be running, so tell `std_crates` that.
     if let Some(crates) = standard_lib::std_crates(config, None) {
         let (std_package_set, _, _) =
-            standard_lib::resolve_std(ws, &mut data, &build_config, &crates)?;
+            standard_lib::resolve_std(ws, &mut data, &build_config, &crates, None)?;
         packages.add_set(std_package_set);
     }
 

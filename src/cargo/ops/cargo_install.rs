@@ -91,7 +91,7 @@ impl<'cfg> InstallablePackage<'cfg> {
                     } else {
                         None
                     };
-                    Some(Dependency::parse(krate, vers.as_deref(), source_id)?)
+                    Some(Dependency::parse(krate, vers.as_deref(), source_id, None)?)
                 } else {
                     None
                 }
